@@ -13,7 +13,7 @@ const char rutaArchivo[] = "cuentas.bin";
 struct Cuenta{
 	int cuenta;
 	char nombre[50];
-	char telefono[50];
+	char telefono[10];
 	int edad;
 	float monto;
 } cuenta[50];
@@ -37,11 +37,13 @@ void buscar();// 4. funcion para buscar cuenta por cuenta o por nombre
 //funcion para mostrar todas las cuentas en el archivo
 void mostrarTodosLosRegistros();
 
+
 int main(){
 		
 	int opc;
 	
 	do{
+		system("cls");
 		cargarArchivoCreado();
 		cout << endl << "\tBienvenido" <<endl;
 		cout<<"\n1.Agregar"<<endl;
@@ -56,17 +58,22 @@ int main(){
 		
 		switch(opc){
 			case 1:
+				system("cls");
 				agregar();
 				system("pause");
 				break;
 			case 2:
+				system("cls");
 				eliminar();
 				system("pause");
 				break;
 			case 3:
+				system("cls");
 				modificar();
+				system("pause");
 				break;
 			case 4:
+				system("cls");
 				buscar();
 				system("pause");
 				break;
@@ -74,6 +81,7 @@ int main(){
 				//Eliminar
 				break;
 			case 6:
+				system("cls");
 				mostrarTodosLosRegistros();
 				system("pause");
 				break;
@@ -83,6 +91,7 @@ int main(){
 			default:
 				cout << endl << "Digita un opcion valida" <<endl;
 				system("pause");
+				system("cls");
 				break;
 		}
 	}
@@ -171,7 +180,6 @@ void agregar(){
         long posicion = ftell(archivo);
 
         Cuenta nuevaCuenta;
-        // nuevaCuenta.cuenta = (posicion / sizeof(Cuenta)) + 1; // Calcula el número de cuenta
         nuevaCuenta.cuenta = generarNumeroDeCuenta(); // Calcula el número de cuenta
 
         cout << endl << "Su numero de cuenta es: " << nuevaCuenta.cuenta << endl;
@@ -185,7 +193,7 @@ void agregar(){
         cout << "Ingrese el monto: ";
         cin >> nuevaCuenta.monto;
 
-        // Escribir la nueva cuenta al final del archivo
+        // Escribimos la nueva cuenta al final del archivo
         fwrite(&nuevaCuenta, sizeof(Cuenta), 1, archivo);
         fclose(archivo);
 
@@ -211,7 +219,7 @@ void eliminar() {
 
         while (fread(&cuentaActual, sizeof(Cuenta), 1, archivo) == 1) {
             if (cuentaActual.cuenta == numeroCuenta) {
-                // Muestra los datos de la cuenta a elimnar en pantalla
+                
                 cout << endl << "Cuenta encontrada:" << endl;
                 cout << "Numero de cuenta: " << cuentaActual.cuenta << endl;
                 cout << "Nombre: " << cuentaActual.nombre << endl;
@@ -220,11 +228,12 @@ void eliminar() {
                 cout << "Monto: " << cuentaActual.monto << endl;
 
                 char confirmacion;
+                //Pedimos la confirmacion de la eliminacion de la cuenta
                 cout << "Seguro que desea eliminar esta cuenta? Presione '1' para eliminar, cualquier otra tecla para cancelar: ";
                 cin >> confirmacion;
 
                 if (confirmacion == '1') {
-                    // Crear un archivo temporal para guardar las cuentas que no se eliminarán
+                    // Creamos un nuevo archivo para escribir las cuentas que no se borrarán
                     FILE* archivoTemporal = fopen("temp.bin", "wb");
                     if (archivoTemporal != NULL) {
                         fseek(archivo, 0, SEEK_SET);
@@ -238,14 +247,13 @@ void eliminar() {
                         fclose(archivo);
                         fclose(archivoTemporal);
 
-                        // Eliminar el archivo original
+                        // Elimnamos el archivo original
                         remove(rutaArchivo);
 
-                        // Renombrar el archivo temporal al nombre original
+                        // Renombramos el archivo temporal al nombre del archivo original
                         rename("temp.bin", rutaArchivo);
                         cout << "Cuenta eliminada exitosamente." << endl << endl;
                     } else {
-                    	//Error al abrir el archiv temporal
                         cout << "Error al elimnar la cuenta, cierre el programa e intente de nuevo" << endl;
                     }
                 } else {
@@ -266,10 +274,64 @@ void eliminar() {
     }
 }
 
-void modificar(){
+void modificar() {
 	
-		
-			
+	long long puntero;
+
+    FILE* archivo = fopen(rutaArchivo, "r+b"); 
+
+    if (archivo != NULL) {
+        Cuenta cuentaActual;
+        bool cuentaEncontrada = false;
+
+            int numeroCuenta;
+   		 	cout << "Busca la cuenta que deseas modificar" << endl;
+            cout << "Ingrese el numero de cuenta: ";
+            cin >> numeroCuenta;
+
+            while (fread(&cuentaActual, sizeof(Cuenta), 1, archivo) == 1) {
+                if (cuentaActual.cuenta == numeroCuenta) {
+                    // Mostrar los datos de la cuenta en pantalla
+                    cout << endl << "Cuenta encontrada:" << endl;
+                    cout << "Numero de cuenta: " << cuentaActual.cuenta << endl;
+                    cout << "Nombre: " << cuentaActual.nombre << endl;
+                    cout << "Telefono: " << cuentaActual.telefono << endl;
+                    cout << "Edad: " << cuentaActual.edad << endl;
+                    cout << "Monto: " << cuentaActual.monto << endl << endl;
+
+                    // Permitir al usuario modificar los datos
+                    cout << "Ingrese el nuevo nombre: ";
+                    cin.ignore();
+                    cin.getline(cuentaActual.nombre, sizeof(cuentaActual.nombre));
+                    cout << "Ingrese el nuevo telefono: ";
+                    cin.getline(cuentaActual.telefono, sizeof(cuentaActual.telefono));
+                    cout << "Ingrese la nueva edad: ";
+                    cin >> cuentaActual.edad;
+
+                    // Colocar el puntero en la posición adecuada para sobrescribir los datos
+                    puntero = -sizeof(Cuenta);
+                    fseek(archivo, puntero, SEEK_CUR);
+                    fwrite(&cuentaActual, sizeof(Cuenta), 1, archivo);
+                    cuentaEncontrada = true;
+
+                    // Mostrar los datos modificados
+                    cout << endl << "Cuenta modificada:" << endl;
+                    cout << "Numero de cuenta: " << cuentaActual.cuenta << endl;
+                    cout << "Nombre: " << cuentaActual.nombre << endl;
+                    cout << "Telefono: " << cuentaActual.telefono << endl;
+                    cout << "Edad: " << cuentaActual.edad << endl;
+                    cout << "Monto: " << cuentaActual.monto << endl;
+                    break;
+                }
+            }
+
+        if (!cuentaEncontrada) {
+            cout << endl<< "La cuenta no existe." << endl << endl << endl;
+        }
+        fclose(archivo);
+    } else {
+        cout << "Error al intentar modificar la cuenta, cierre el programa e intente de nuevo, por favor." << endl;
+    }
 }
 
 void buscar() {
@@ -284,16 +346,16 @@ void buscar() {
 
     if (archivo != NULL) {
         Cuenta cuentaActual;
-        bool cuentaEncontrada = false; // Variable para indicar si se encontró una cuenta
+        bool cuentaEncontrada = false;
 
-        if (opcionBusqueda == 1) { // Buscar por número de cuenta
+        if (opcionBusqueda == 1) {
             int numeroCuenta;
             cout << "Ingrese el numero de cuenta a buscar: ";
             cin >> numeroCuenta;
 
             while (fread(&cuentaActual, sizeof(Cuenta), 1, archivo) == 1) {
                 if (cuentaActual.cuenta == numeroCuenta) {
-                    // Muestra los datos de la cuenta en pantalla
+                	
                     cout << endl << endl << "Cuenta encontrada:" << endl;
                     cout << "Numero de cuenta: " << cuentaActual.cuenta << endl;
                     cout << "Nombre: " << cuentaActual.nombre << endl;
@@ -304,7 +366,7 @@ void buscar() {
                     break;
                 }
             }
-        } else if (opcionBusqueda == 2) { // Buscar por nombre de cuenta
+        } else if (opcionBusqueda == 2) {
             cin.ignore();
             char nombreBusqueda[50];
             cout << "Ingrese el nombre de cuenta a buscar: ";
@@ -312,7 +374,7 @@ void buscar() {
 
             while (fread(&cuentaActual, sizeof(Cuenta), 1, archivo) == 1) {
                 if (strcmp(cuentaActual.nombre, nombreBusqueda) == 0) {
-                    // Muestra los datos de la cuenta en pantalla
+                	
                     cout << endl << endl << "Cuenta encontrada:" << endl;
                     cout << "Numero de cuenta: " << cuentaActual.cuenta << endl;
                     cout << "Nombre: " << cuentaActual.nombre << endl;
@@ -325,12 +387,11 @@ void buscar() {
         }
 
         if (!cuentaEncontrada) {
-            cout << endl<< "La cuenta no existe." << endl << endl << endl;
+            cout << endl<< "La cuenta no existe" << endl << endl << endl;
         }
         fclose(archivo);
     } else {
-        cout << "No se pudo abrir el archivo " << rutaArchivo << endl;
-        cout << "No se pueden buscar cuentas." << endl;
+        cout << "Error al intentar buscar la cuenta, cierre el programa e intente de nuevo" << endl;
     }
 }
 
