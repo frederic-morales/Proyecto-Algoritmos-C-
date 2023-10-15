@@ -32,6 +32,7 @@ void agregar();// 1. funcion para abrir y agregar Cuenta al archivo
 void eliminar();// 2. funcion para buscar y eliminar una Cuenta en el archivo
 void modificar(); //3. funcion para buscar y editar la informacion de la cuenta(Nombre, Teléfono, Edad)
 void buscar();// 4. funcion para buscar cuenta por cuenta o por nombre
+void manejoDeCuenta(); //5. funcion para depositar o debitar
 
 
 //funcion para mostrar todas las cuentas en el archivo
@@ -78,7 +79,9 @@ int main(){
 				system("pause");
 				break;
 			case 5:
-				//Eliminar
+				system("cls");
+				manejoDeCuenta();
+				system("pause");
 				break;
 			case 6:
 				system("cls");
@@ -89,10 +92,10 @@ int main(){
 				//salir
 				break;
 			default:
-				cout << endl << "Digita un opcion valida" <<endl;
+				cout << endl << "Digita una opcion valida" <<endl;
 				system("pause");
 				system("cls");
-				break;
+			break;
 		}
 	}
 	while(opc != 7);
@@ -275,9 +278,6 @@ void eliminar() {
 }
 
 void modificar() {
-	
-	long long puntero;
-
     FILE* archivo = fopen(rutaArchivo, "r+b"); 
 
     if (archivo != NULL) {
@@ -309,7 +309,7 @@ void modificar() {
                     cin >> cuentaActual.edad;
 
                     // Colocar el puntero en la posición adecuada para sobrescribir los datos
-                    puntero = -sizeof(Cuenta);
+                    long long puntero = -sizeof(Cuenta);
                     fseek(archivo, puntero, SEEK_CUR);
                     fwrite(&cuentaActual, sizeof(Cuenta), 1, archivo);
                     cuentaEncontrada = true;
@@ -324,7 +324,6 @@ void modificar() {
                     break;
                 }
             }
-
         if (!cuentaEncontrada) {
             cout << endl<< "La cuenta no existe." << endl << endl << endl;
         }
@@ -395,4 +394,104 @@ void buscar() {
     }
 }
 
+void manejoDeCuenta(){
+	
+	int opc;
+	cout << "1. Depositar " << endl;
+	cout << "2. Retirar " << endl;
+	cout << "Que transaccion que desea realizar: ";
+	cin >> opc;
+	
+	FILE* archivo = fopen(rutaArchivo, "r+b");
+	
+	if(archivo != NULL){
+        Cuenta cuentaActual;
+        bool cuentaEncontrada = false;
+        int numeroCuenta;
+        float deposito, retiro, montoFinal;
+		
+		switch(opc){
+			case 1:
+			cout << "Ingrese el numero de cuenta: ";	
+			cin >> numeroCuenta;
+			
+			while (fread(&cuentaActual, sizeof(Cuenta), 1, archivo) == 1) {
+                if (cuentaActual.cuenta == numeroCuenta){
+                	
+					cout << endl << "Cuenta encontrada:" << endl;
+                    cout << "Numero de cuenta: " << cuentaActual.cuenta << endl;
+                    cout << "Nombre: " << cuentaActual.nombre << endl;
+                    cout << "Telefono: " << cuentaActual.telefono << endl;
+                    cout << "Edad: " << cuentaActual.edad << endl;
+                    cout << "Monto: " << cuentaActual.monto << endl << endl;
+                    
+                    // Pedirle al usuario cuanto va a depositar
+                    cout << "Ingrese la cantidad a depositar: ";
+                    cin >> deposito;
+                    montoFinal = cuentaActual.monto + deposito;
+                    cuentaActual.monto = montoFinal;
+                    
+                    long long puntero = -sizeof(Cuenta);
+                    fseek(archivo, puntero, SEEK_CUR);
+                    fwrite(&cuentaActual, sizeof(Cuenta), 1, archivo);
+                    cuentaEncontrada = true;
+                    
+                    cout << endl << "Se deposito " << deposito << " a su cuenta" << endl;
+                    cout << "Su monto actual es de: " << cuentaActual.monto << endl << endl ;
+                    break;
+				} 
+        	}
+        	if (!cuentaEncontrada) {
+            	cout << endl<< "La cuenta no existe."<< endl << endl;
+        	}
+        	fclose(archivo);
+			break;
+			case 2:
+			cout << "Ingrese el numero de cuenta: ";	
+			cin >> numeroCuenta;
+			
+			while (fread(&cuentaActual, sizeof(Cuenta), 1, archivo) == 1) {
+                if (cuentaActual.cuenta == numeroCuenta){
+                	
+					cout << endl << "Cuenta encontrada:" << endl;
+                    cout << "Numero de cuenta: " << cuentaActual.cuenta << endl;
+                    cout << "Nombre: " << cuentaActual.nombre << endl;
+                    cout << "Telefono: " << cuentaActual.telefono << endl;
+                    cout << "Edad: " << cuentaActual.edad << endl;
+                    cout << "Monto: " << cuentaActual.monto << endl << endl;
+                    
+                    // Pedirle al usurio cuanto va a depositar
+                    cout << "Ingrese la cantidad a retirar: ";
+                    cin >> retiro;
+                    
+                    if(retiro <= cuentaActual.monto){
+                    	montoFinal = cuentaActual.monto - retiro;
+                    	cuentaActual.monto = montoFinal;
+                    
+                   		long long puntero = -sizeof(Cuenta);
+                    	fseek(archivo, puntero, SEEK_CUR);
+                    	fwrite(&cuentaActual, sizeof(Cuenta), 1, archivo);
+                    	cuentaEncontrada = true;
+                    
+                    	cout << endl << "Se retiro " << retiro << " de su cuenta" << endl;
+                    	cout << "Su monto actual es de: " << cuentaActual.monto << endl << endl ;
+					} else{
+						cout << endl << "No puede retirar esa cantidad" << endl;
+						cout << "No existen fondos suficientes" << endl;
+					}
+                    break;
+				} 
+        	}
+        	if (!cuentaEncontrada) {
+            	cout << endl<< "La cuenta no existe."<< endl << endl;
+        	}
+        	fclose(archivo);
+			break;
+		}
+		
+	} else{
+		cout << "Error al intentar realizar la transaccion";
+	}
+		
+}
 
