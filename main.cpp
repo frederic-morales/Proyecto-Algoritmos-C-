@@ -19,7 +19,7 @@ struct Cuenta{
 } cuenta[50];
 	
 //funciones de archivo
-void crearArchivo(); //Solo se ejecutara una vez cuando el archivo no exista
+void crearArchivo(); //Solo se ejecutara una vez cuando el archivo no exista, osea no existen cuentas
 void cargarArchivoCreado();
 
 
@@ -454,6 +454,8 @@ void manejoDeCuenta(){
 		
 }
 
+// REPORTES
+
 void reportes(){
 	
 	int opc;
@@ -505,7 +507,10 @@ void reportes(){
 }
 
 void mostrarTodosLosRegistros(){
-	             
+	            
+	int opc;
+	bool cuentaEncontrada = false;
+	
 	FILE* archivo = fopen(rutaArchivo, "rb");
 	
 	if(archivo != NULL){
@@ -518,9 +523,47 @@ void mostrarTodosLosRegistros(){
             cout << "Telefono: " << cuentaActual.telefono << endl;
             cout << "Edad: " << cuentaActual.edad << endl;
             cout << "Monto: Q" << cuentaActual.monto << endl <<endl;
+            cuentaEncontrada = true;
         }		
         cout << "------------------------" << endl << endl;
 		fclose(archivo);
+		
+		if(cuentaEncontrada) {
+			
+			cout << "Desea generar un archivo de texto para este reporte?" << endl;
+        	cout << "Escriba 1 para confirmar 2 para cancelar: ";
+    		cin >> opc;
+    		
+    		if(opc == 1){
+    			
+				char nomArchivoTexto[50];
+            	cout << endl << "Como desea llamar a su reporte?" << endl;
+				cout << "debe agregarle extension .txt: ";
+                cin.ignore();
+                cin.getline(nomArchivoTexto, sizeof(nomArchivoTexto));
+                
+                // le pedimos al usuario el nombre del archivo de texto donde se guardaran las cuentas
+                
+				ofstream archivoDeTexto(nomArchivoTexto);
+                archivoDeTexto << "Cuentas encontradas: " << endl << endl;
+                
+                //Volvemos a abrir el archivo binario para guardar la informacion e el nuevo archivo de texto
+                FILE* archivo = fopen(rutaArchivo, "rb");
+            	Cuenta cuentaActual;
+                
+                while (fread(&cuentaActual, sizeof(Cuenta), 1, archivo) == 1) {
+
+					archivoDeTexto << "Numero de cuenta: " << cuentaActual.cuenta << endl;
+					archivoDeTexto << "Nombre: " << cuentaActual.nombre << endl;
+              		archivoDeTexto << "Telefono: " << cuentaActual.telefono << endl;
+                	archivoDeTexto << "Edad: " << cuentaActual.edad << endl;
+                	archivoDeTexto << "Monto: Q" << cuentaActual.monto << endl << endl ;
+             	
+        		}
+    			archivoDeTexto.close();
+    			fclose(archivo);
+			}
+		}
 		
 	} else{
 		cout << "No se pudo abrir el archivo" << rutaArchivo << endl;
@@ -529,6 +572,9 @@ void mostrarTodosLosRegistros(){
 }
 
 void reportePorEdad(int edadMinima, int edadMaxima){
+	
+	int opc;
+	bool cuentaEncontrada = false;
 	
 	FILE* archivo = fopen(rutaArchivo, "rb");
 	
@@ -543,10 +589,47 @@ void reportePorEdad(int edadMinima, int edadMaxima){
                 cout << "Telefono: " << cuentaActual.telefono << endl;
                 cout << "Edad: " << cuentaActual.edad << endl;
                 cout << "Monto: Q" << cuentaActual.monto << endl << endl ;
+                cuentaEncontrada = true;
             }
         }
         cout << "------------------------" << endl << endl;
 		fclose(archivo);
+		
+		if(cuentaEncontrada) {
+			
+			cout << "Desea generar un archivo de texto para este reporte?" << endl;
+        	cout << "Escriba 1 para confirmar 2 para cancelar: ";
+    		cin >> opc;
+    		
+    		if(opc == 1){
+    			
+				char nomArchivoTexto[50];
+            	cout << endl << "Como desea llamar a su reporte?" << endl;
+				cout << "debe agregarle extension .txt: ";
+                cin.ignore();
+                cin.getline(nomArchivoTexto, sizeof(nomArchivoTexto));
+                
+				ofstream archivoDeTexto(nomArchivoTexto);
+                archivoDeTexto << "Cuentas encontradas por el rango de edad: " << endl << endl;
+                
+                FILE* archivo = fopen(rutaArchivo, "rb");
+            	Cuenta cuentaActual;
+                
+                while (fread(&cuentaActual, sizeof(Cuenta), 1, archivo) == 1) {
+        			if (cuentaActual.edad >= edadMinima && cuentaActual.edad <= edadMaxima) {
+
+						archivoDeTexto << "Numero de cuenta: " << cuentaActual.cuenta << endl;
+           				archivoDeTexto << "Nombre: " << cuentaActual.nombre << endl;
+                		archivoDeTexto << "Telefono: " << cuentaActual.telefono << endl;
+                		archivoDeTexto << "Edad: " << cuentaActual.edad << endl;
+                		archivoDeTexto << "Monto: Q" << cuentaActual.monto << endl << endl ;
+             	
+            		}
+        		}
+    			archivoDeTexto.close();
+    			fclose(archivo);
+			}
+		}		
 		
 	} else {
 		cout << "Error al buscar las cuentas";
@@ -554,6 +637,9 @@ void reportePorEdad(int edadMinima, int edadMaxima){
 }
 
 void reportePorMonto(float montMinimo, float montMaximo){
+	
+	int opc;
+	bool cuentaEncontrada = false;
 	
 	FILE* archivo = fopen(rutaArchivo, "rb");
 	
@@ -568,18 +654,56 @@ void reportePorMonto(float montMinimo, float montMaximo){
                 cout << "Telefono: " << cuentaActual.telefono << endl;
                 cout << "Edad: " << cuentaActual.edad << endl;
                 cout << "Monto: Q" << cuentaActual.monto << endl << endl ;
+                cuentaEncontrada = true;
             }
         }
-        cout << "------------------------" << endl << endl;
+		cout << "------------------------" << endl << endl;
 		fclose(archivo);
 		
+		if(cuentaEncontrada) {
+			
+			cout << "Desea generar un archivo de texto para este reporte?" << endl;
+        	cout << "Escriba 1 para confirmar 2 para cancelar: ";
+    		cin >> opc;
+    		
+    		if(opc == 1){
+    			
+				char nomArchivoTexto[50];
+            	cout << endl << "Como desea llamar a su reporte?" << endl;
+				cout << "debe agregarle extension .txt: ";
+                cin.ignore();
+                cin.getline(nomArchivoTexto, sizeof(nomArchivoTexto));
+                
+				ofstream archivoDeTexto(nomArchivoTexto);
+                archivoDeTexto << "Cuentas encontradas por el rango del monto: " << endl;
+                
+                FILE* archivo = fopen(rutaArchivo, "rb");
+            	Cuenta cuentaActual;
+                
+                while (fread(&cuentaActual, sizeof(Cuenta), 1, archivo) == 1) {
+        			if (cuentaActual.monto>= montMinimo && cuentaActual.monto <= montMaximo) {
+
+						archivoDeTexto << "Numero de cuenta: " << cuentaActual.cuenta << endl;
+           				archivoDeTexto << "Nombre: " << cuentaActual.nombre << endl;
+                		archivoDeTexto << "Telefono: " << cuentaActual.telefono << endl;
+                		archivoDeTexto << "Edad: " << cuentaActual.edad << endl;
+                		archivoDeTexto << "Monto: Q" << cuentaActual.monto << endl << endl ;
+             	
+            		}
+        		}
+    			archivoDeTexto.close();
+    			fclose(archivo);
+			}
+		}    	
+        
 	} else {
 		cout << "Error al buscar las cuentas";
 	}
-	
 }
 
 void reportePorCuenta(int numCuenta){
+	
+	int opc;
 	
 	FILE * archivo = fopen(rutaArchivo, "rb");
 	
@@ -594,12 +718,39 @@ void reportePorCuenta(int numCuenta){
                 cout << "Telefono: " << cuentaActual.telefono << endl;
                 cout << "Edad: " << cuentaActual.edad << endl;
                 cout << "Monto: Q" << cuentaActual.monto << endl << endl ;
+                cout << "---------------------------" << endl << endl;
+                
+                cout << "Desea generar un archivo de texto para este reporte?" << endl;
+                cout << "Escriba 1 para confirmar 2 para cancelar: ";
+                cin >> opc;
+                
+                if(opc == 1){
+                	
+					char nomArchivoTexto[50];
+                	cout << endl << "Como desea llamar a su reporte?" << endl;
+					cout << "debe agregarle extension .txt: ";
+                	cin.ignore();
+					cin.getline(nomArchivoTexto, sizeof(nomArchivoTexto));
+                	
+					ofstream archivoDeTexto(nomArchivoTexto);
+  					archivoDeTexto << "Cuenta econtrada" << endl;
+					archivoDeTexto << "Numero de cuenta: " << cuentaActual.cuenta << endl;
+           			archivoDeTexto << "Nombre: " << cuentaActual.nombre << endl;
+                	archivoDeTexto << "Telefono: " << cuentaActual.telefono << endl;
+                	archivoDeTexto << "Edad: " << cuentaActual.edad << endl;
+                	archivoDeTexto << "Monto: Q" << cuentaActual.monto << endl << endl ;
+                	
+                	archivoDeTexto.close();
+                	
+                	cout << "archivo creado exitosamente" << endl;
+				}
 			}
 		}
-		cout << "---------------------------" << endl << endl;
+
 		fclose(archivo);
 	} else{
 		cout << "Error al buscar las cuentas";
 	}
 	
 }
+
